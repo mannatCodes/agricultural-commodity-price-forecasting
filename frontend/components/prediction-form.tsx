@@ -132,7 +132,7 @@ export function PredictionForm() {
   return (
     <div className="space-y-6">
       <Card className="dashboard-card overflow-hidden rounded-2xl">
-        <CardHeader className="border-b border-stone-100 bg-stone-50/70 p-6 sm:p-7">
+        <CardHeader className="border-b border-stone-100 bg-stone-50/70 p-6 sm:p-7 dark:border-emerald-700/70 dark:bg-emerald-700/35">
           <div className="flex items-start gap-3">
             <div className="rounded-xl bg-emerald-100 p-2.5 text-emerald-800"><Radar className="h-5 w-5" /></div>
             <div><CardTitle className="font-display text-2xl">Create a forecast</CardTitle>

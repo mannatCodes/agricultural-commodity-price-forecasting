@@ -83,6 +83,6 @@
   }
 
   .dashboard-card {
-    @apply border border-stone-200/80 bg-white/90 shadow-[0_12px_35px_-22px_rgba(20,83,45,0.35)] backdrop-blur;
+    @apply border border-stone-200/80 bg-white/90 shadow-[0_12px_35px_-22px_rgba(20,83,45,0.35)] backdrop-blur dark:border-emerald-700/70 dark:bg-emerald-800/90;
   }
 }
