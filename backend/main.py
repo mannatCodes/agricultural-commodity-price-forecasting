@@ -10,14 +10,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from statsmodels.tsa.arima.model import ARIMA
 
-from backend.auth import router as auth_router, initialize_auth_database
+from auth import router as auth_router, initialize_auth_database
 
 
 app = FastAPI()
 initialize_auth_database()
 app.include_router(auth_router)
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_PATH = os.path.join(BASE_DIR, "datasets", "final_dataset.csv")
 MIN_OBSERVATIONS = 90
 MAX_TRAINING_DAYS = 730
