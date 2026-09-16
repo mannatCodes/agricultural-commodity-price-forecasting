@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from statsmodels.tsa.arima.model import ARIMA
 
-from auth import router as auth_router, initialize_auth_database
+from backend.auth import router as auth_router, initialize_auth_database
 
 
 app = FastAPI()
