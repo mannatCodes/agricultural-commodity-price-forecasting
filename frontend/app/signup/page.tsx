@@ -5,7 +5,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ModeToggle } from "@/components/mode-toggle"
 
-const API_URL = "http://localhost:8000"
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 export default function SignupPage() {
   const [name, setName] = useState("")
