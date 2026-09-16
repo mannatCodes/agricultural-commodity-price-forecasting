@@ -31,6 +31,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "https://frontend-1js1njep9-mannat2.vercel.app",
+        "https://frontend-azm10pegr-mannat2.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
