@@ -7,9 +7,25 @@ import { Navbar } from "@/components/navbar"
 import { PredictionForm } from "@/components/prediction-form"
 import { Activity, ArrowUpRight, CalendarDays, MapPin, Sparkles } from "lucide-react"
 
+type DashboardStats = {
+  markets: number
+  commodities: number
+  forecastSeries: number
+  average30DayMovement: number | null
+  lastUpdated: string
+}
+
+const formatDate = (value: string) =>
+  new Intl.DateTimeFormat("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(`${value}T00:00:00`))
+
 export default function DashboardPage() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [stats, setStats] = useState<DashboardStats | null>(null)
 
   useEffect(() => {
     const userEmail = sessionStorage.getItem("userEmail")
@@ -21,6 +37,20 @@ export default function DashboardPage() {
 
     setIsAuthenticated(true)
   }, [router])
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard-stats`)
+        if (!response.ok) throw new Error("Unable to load dashboard stats")
+        setStats(await response.json())
+      } catch (error) {
+        console.error("Failed to load dashboard stats:", error)
+      }
+    }
+
+    loadStats()
+  }, [])
 
   if (!isAuthenticated) {
     return (
@@ -45,19 +75,19 @@ export default function DashboardPage() {
                 <Sparkles className="h-3.5 w-3.5 text-[#b88625]" /> Market intelligence desk
               </div>
               <h1 className="max-w-2xl font-display text-4xl font-semibold tracking-tight text-emerald-950 sm:text-5xl">See the market before it moves.</h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-emerald-900/70 sm:text-base">Build a focused forecast from market-level price signals and make the next procurement decision with confidence.</p>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-emerald-900/70 sm:text-base">Choose a market and commodity below to generate a data-backed price forecast for the next 30 days.</p>
             </div>
             <div className="flex flex-wrap gap-3 text-sm text-emerald-950">
-              <div className="flex items-center gap-2 rounded-xl bg-white/75 px-3.5 py-2.5 shadow-sm"><CalendarDays className="h-4 w-4 text-emerald-700" />Updated daily</div>
-              <div className="flex items-center gap-2 rounded-xl bg-white/75 px-3.5 py-2.5 shadow-sm"><MapPin className="h-4 w-4 text-emerald-700" />550+ markets</div>
+              <div className="flex items-center gap-2 rounded-xl bg-white/75 px-3.5 py-2.5 shadow-sm"><CalendarDays className="h-4 w-4 text-emerald-700" />Data through {stats ? formatDate(stats.lastUpdated) : "..."}</div>
+              <div className="flex items-center gap-2 rounded-xl bg-white/75 px-3.5 py-2.5 shadow-sm"><MapPin className="h-4 w-4 text-emerald-700" />{stats?.forecastSeries ?? "..."} forecast series</div>
             </div>
           </div>
         </section>
 
         <section className="mb-8 grid gap-4 sm:grid-cols-3">
-          <div className="dashboard-card rounded-2xl p-5"><div className="flex items-center justify-between"><span className="text-sm font-medium text-muted-foreground">Markets monitored</span><MapPin className="h-4 w-4 text-emerald-700" /></div><p className="mt-4 font-display text-3xl font-semibold">550<span className="text-lg text-emerald-700">+</span></p><p className="mt-1 text-xs text-muted-foreground">Reporting centres across India</p></div>
-          <div className="dashboard-card rounded-2xl p-5"><div className="flex items-center justify-between"><span className="text-sm font-medium text-muted-foreground">Active commodities</span><Activity className="h-4 w-4 text-emerald-700" /></div><p className="mt-4 font-display text-3xl font-semibold">22</p><p className="mt-1 text-xs text-muted-foreground">Essential produce categories tracked</p></div>
-          <div className="rounded-2xl bg-emerald-900 p-5 text-emerald-50 shadow-[0_14px_30px_-18px_rgba(6,78,59,0.8)]"><div className="flex items-center justify-between text-emerald-100/70"><span className="text-sm font-medium">Market momentum</span><ArrowUpRight className="h-4 w-4" /></div><p className="mt-4 font-display text-3xl font-semibold">+2.5%</p><p className="mt-1 text-xs text-emerald-100/70">Average movement in the last 30 days</p></div>
+          <div className="dashboard-card rounded-2xl p-5"><div className="flex items-center justify-between"><span className="text-sm font-medium text-muted-foreground">Markets monitored</span><MapPin className="h-4 w-4 text-emerald-700" /></div><p className="mt-4 font-display text-3xl font-semibold">{stats?.markets ?? "—"}</p><p className="mt-1 text-xs text-muted-foreground">Reporting centres in this dataset</p></div>
+          <div className="dashboard-card rounded-2xl p-5"><div className="flex items-center justify-between"><span className="text-sm font-medium text-muted-foreground">Active commodities</span><Activity className="h-4 w-4 text-emerald-700" /></div><p className="mt-4 font-display text-3xl font-semibold">{stats?.commodities ?? "—"}</p><p className="mt-1 text-xs text-muted-foreground">Produce categories available to explore</p></div>
+          <div className="rounded-2xl bg-emerald-900 p-5 text-emerald-50 shadow-[0_14px_30px_-18px_rgba(6,78,59,0.8)]"><div className="flex items-center justify-between text-emerald-100/70"><span className="text-sm font-medium">30-day price movement</span><ArrowUpRight className="h-4 w-4" /></div><p className="mt-4 font-display text-3xl font-semibold">{stats?.average30DayMovement == null ? "—" : `${stats.average30DayMovement >= 0 ? "+" : ""}${stats.average30DayMovement}%`}</p><p className="mt-1 text-xs text-emerald-100/70">Average change across tracked market series</p></div>
         </section>
 
         <PredictionForm />
