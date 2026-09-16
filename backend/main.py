@@ -56,6 +56,38 @@ def get_available_options() -> list[dict[str, Any]]:
     return options.loc[options["count"] >= MIN_OBSERVATIONS, ["centre_name", "commodity_name"]].to_dict(orient="records")
 
 
+@lru_cache(maxsize=1)
+def _dashboard_stats() -> dict[str, Any]:
+    """Summarise the dataset shown on the dashboard without hard-coded figures."""
+    grouped = df.groupby(["centre_name", "commodity_name"])
+    observations = grouped["Date"].nunique()
+    eligible = observations[observations >= MIN_OBSERVATIONS]
+
+    movements: list[float] = []
+    for _, market_data in grouped:
+        daily = market_data.groupby("Date")["price"].mean().sort_index()
+        if len(daily) < 2:
+            continue
+        latest_date = daily.index.max()
+        comparison_date = latest_date - pd.Timedelta(days=30)
+        previous = daily.loc[daily.index <= comparison_date]
+        if not previous.empty and previous.iloc[-1] != 0:
+            movements.append((daily.iloc[-1] - previous.iloc[-1]) / previous.iloc[-1] * 100)
+
+    return {
+        "markets": int(df["centre_name"].nunique()),
+        "commodities": int(df["commodity_name"].nunique()),
+        "forecastSeries": int(len(eligible)),
+        "average30DayMovement": round(float(np.mean(movements)), 2) if movements else None,
+        "lastUpdated": df["Date"].max().strftime("%Y-%m-%d"),
+    }
+
+
+@app.get("/dashboard-stats")
+def get_dashboard_stats() -> dict[str, Any]:
+    return _dashboard_stats()
+
+
 def _daily_series(prices: pd.Series) -> pd.Series:
     """Create a calendar-day series without using future values to fill gaps."""
     series = prices.groupby(level=0).mean().sort_index().astype(float)
